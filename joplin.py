@@ -83,15 +83,3 @@ def jex(title='joplin'):
         remove(name)
     tar.close()
     return tar
-
-
-if __name__ == '__main__':
-    nbid = notebook("Notebook 1")
-    print(nbid)
-    ntid = note("Note 1", "Note 1", nbid)
-    print(ntid)
-    tgid = tag("Tag 1")
-    print(tgid)
-    tnid = tag_note(tgid, ntid)
-    print(tnid)
-    jex()
