@@ -11,11 +11,14 @@ def __id():
     id = uuid4().hex
     return id, f'{id}.md'
 
+
 def __xstr(s):
     return '' if s is None else str(s)
 
+
 def __cstr(text, condition=None, alternative=''):
     return text if condition else alternative
+
 
 def __line(key=None, value=None, jump=True):
     return "{}{}{}{}".format(__xstr(key), __cstr(': ', value is not None), __xstr(value), __cstr('\n', jump))
@@ -23,7 +26,7 @@ def __line(key=None, value=None, jump=True):
 
 def __entity(type, title=None, body=None, parent='', date=None, args={}):
     obid, filename = __id()
-    file = open(filename, 'w')
+    file = open(filename, 'w', encoding="utf-8")
 
     if title is not None:
         file.write(__line(title))
@@ -32,7 +35,7 @@ def __entity(type, title=None, body=None, parent='', date=None, args={}):
     if body is not None:
         file.write(__line(body))
         file.write(__line())
-    
+
     data = {
         'id': obid, 'created_time': date, 'updated_time': date, **args,
         'user_created_time': date, 'user_updated_time': date, 'encryption_cipher_text': '',
@@ -51,14 +54,18 @@ def __entity(type, title=None, body=None, parent='', date=None, args={}):
     return obid
 
 
+#
 def notebook(title, parent='', date=DATETIME):
     return __entity(2, title, parent=parent, date=date)
+
 
 def tag(title, date=DATETIME):
     return __entity(5, title, date=date)
 
-def tag_note(tag, note, date=DATETIME):
-    return __entity(6, parent=None, date=date, args={'tag_id': tag, 'note_id': note})
+
+def tag_note(tag_id, note_id, date=DATETIME):
+    return __entity(6, parent=None, date=date, args={'tag_id': tag_id, 'note_id': note_id})
+
 
 def note(title, body, parent, date=DATETIME, latitude=0, longitude=0, altitude=0, author=''):
     return __entity(1, title, body, parent=parent, date=date, args={
@@ -68,18 +75,17 @@ def note(title, body, parent, date=DATETIME, latitude=0, longitude=0, altitude=0
     })
 
 
-def tar():
-    tar = tarfile.open('joplin.jex', "w:")
+def jex(title='joplin'):
+    tar = tarfile.open(f'{title}.jex', "w:")
     tar.format = tarfile.USTAR_FORMAT
     for name in FILES:
         tar.add(name)
         remove(name)
     tar.close()
     return tar
-    
 
 
-def jex():
+if __name__ == '__main__':
     nbid = notebook("Notebook 1")
     print(nbid)
     ntid = note("Note 1", "Note 1", nbid)
@@ -88,8 +94,4 @@ def jex():
     print(tgid)
     tnid = tag_note(tgid, ntid)
     print(tnid)
-    tar()
-
-
-if __name__ == '__main__':
     jex()
