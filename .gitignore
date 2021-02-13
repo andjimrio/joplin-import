@@ -139,6 +139,7 @@ cython_debug/
 
 # Project exclusions
 .vscode/
+.idea/
 *.jex
 files/
 ref/

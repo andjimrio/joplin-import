@@ -34,19 +34,29 @@ def __title(title, subtitle):
 
 
 def __metadata(text, row):
-    pass
+    values = ['author', 'book', 'date', 'ref']
+    return text + '\n\n\n\n' + "\n".join(['- {}'.format(row[value]) for value in values if row[value]])
 
 
-def csv_process(infile, outfile=None, location=LOCATION, creator=CREATOR, parent="IMPORT",
+def ini_process(nb="IMPORT"):
+    return notebook(nb)
+
+
+def end_process(outfile="joplin"):
+    return jex(outfile)
+
+
+def csv_process(infile, location=LOCATION, creator=CREATOR, parent=None, metadata=True, outfile=None,
                 dateformat='%d/%m/%Y %H:%M:%S', encoding='utf-8-sig'):
     with open(infile, encoding=encoding) as csv_file:
         reader = DictReader(csv_file, delimiter=',')
 
-        nb = notebook(parent) if parent else ''
+        nb = ini_process() if parent is None else parent
 
         for row in reader:
             date = __date(row['date'], dateformat)
             title = __title(row['title'], row['ref'])
+            body = __metadata(row['text'], row) if metadata else row['text']
 
             author = __database_nb(row['author'], AUTHORS, notebook,
                                    {'title': row['author'].upper(), 'parent': nb, 'date': date}
@@ -57,7 +67,7 @@ def csv_process(infile, outfile=None, location=LOCATION, creator=CREATOR, parent
                                  )
 
             quote = note(
-                title, str(row['text']), book, date, author=creator,
+                title, body, book, date, author=creator,
                 latitude=location[0], longitude=location[1], altitude=location[2]
             )
 
