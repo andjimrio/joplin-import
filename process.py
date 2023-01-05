@@ -28,14 +28,14 @@ def __date(data, pattern):
 
 
 def __title(title, subtitle):
-    ref = '[{}] '.format('{0:04d}'.format(subtitle) if type(subtitle) == 'Number' else subtitle) \
+    ref = '[{}] '.format('{:04d}'.format(int(subtitle)) if subtitle.isnumeric() else subtitle) \
         if len(subtitle) and len(subtitle) < 7 else ''
     return '{}{}'.format(ref, title)
 
 
 def __metadata(text, row):
-    values = ['author', 'book', 'date', 'ref']
-    return text + '\n\n\n\n' + "\n".join(['- {}'.format(row[value]) for value in values if row[value]])
+    values = ['date', 'author', 'book', 'ref']
+    return text + "\n\n\n-----\n" + "\n".join(['- {}'.format(row[value]) for value in values if row[value]])
 
 
 def ini_process(nb="IMPORT"):
@@ -47,9 +47,9 @@ def end_process(outfile="joplin"):
 
 
 def csv_process(infile, location=LOCATION, creator=CREATOR, parent=None, metadata=True, outfile=None,
-                dateformat='%d/%m/%Y %H:%M:%S', encoding='utf-8-sig'):
+                dateformat='%d/%m/%Y %H:%M:%S', encoding='utf-8-sig', delimiter=','):
     with open(infile, encoding=encoding) as csv_file:
-        reader = DictReader(csv_file, delimiter=',')
+        reader = DictReader(csv_file, delimiter=delimiter)
 
         nb = ini_process() if parent is None else parent
 

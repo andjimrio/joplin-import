@@ -54,7 +54,6 @@ def __entity(type, title=None, body=None, parent='', date=None, args={}):
     return obid
 
 
-#
 def notebook(title, parent='', date=DATETIME):
     return __entity(2, title, parent=parent, date=date)
 
