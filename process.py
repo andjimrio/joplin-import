@@ -1,6 +1,7 @@
 from csv import DictReader
 from datetime import datetime
 from joplin import notebook, note, tag, tag_note, jex
+from kindle import get_highlights
 
 LOCATION = (0, 0, 0)
 CREATOR = "SYSTEM"
@@ -19,7 +20,7 @@ def __database_nb(key, obj, fn, args={}):
         return ide
 
 
-def __date(data, pattern):
+def __date(data, pattern=None):
     try:
         res = datetime.strptime(data, pattern)
     except ValueError:
@@ -34,7 +35,7 @@ def __title(title, subtitle):
 
 
 def __metadata(text, row):
-    values = ['date', 'author', 'book', 'ref']
+    values = ['date', 'author', 'book', 'ref', 'tags']
     return text + "\n\n\n-----\n" + "\n".join(['- {}'.format(row[value]) for value in values if row[value]])
 
 
@@ -54,26 +55,39 @@ def csv_process(infile, location=LOCATION, creator=CREATOR, parent=None, metadat
         nb = ini_process() if parent is None else parent
 
         for row in reader:
-            date = __date(row['date'], dateformat)
-            title = __title(row['title'], row['ref'])
-            body = __metadata(row['text'], row) if metadata else row['text']
-
-            author = __database_nb(row['author'], AUTHORS, notebook,
-                                   {'title': row['author'].upper(), 'parent': nb, 'date': date}
-                                   )
-            __database_nb(author, BOOKS, dict)
-            book = __database_nb(row['book'], BOOKS[author], notebook,
-                                 {'title': row['book'], 'parent': author, 'date': date}
-                                 )
-
-            quote = note(
-                title, body, book, date, author=creator,
-                latitude=location[0], longitude=location[1], altitude=location[2]
-            )
-
-            if len(row['tags']):
-                for key in row['tags'].split(','):
-                    keyword = __database_nb(key.strip(), TAGS, tag, {'title': key.strip(), 'date': date})
-                    tag_note(keyword, quote)
+            jex_process(nb, row, location, creator, metadata, dateformat)
 
     return jex(outfile) if outfile else None
+
+
+def kindle_process(infile, location=LOCATION, creator=CREATOR, parent=None, metadata=True, outfile=None):
+    nb = ini_process() if parent is None else parent
+
+    for row in get_highlights(infile):
+        jex_process(nb, row, location, creator, metadata)
+
+    return jex(outfile) if outfile else None
+
+
+def jex_process(nb, row, location, creator, metadata, dateformat=None):
+    date = __date(row['date'], dateformat)
+    title = __title(row['title'], row['ref'])
+    body = __metadata(row['text'], row) if metadata else row['text']
+
+    author = __database_nb(row['author'], AUTHORS, notebook,
+                            {'title': row['author'].upper(), 'parent': nb, 'date': date}
+                            )
+    __database_nb(author, BOOKS, dict)
+    book = __database_nb(row['book'], BOOKS[author], notebook,
+                            {'title': row['book'], 'parent': author, 'date': date}
+                            )
+
+    quote = note(
+        title, body, book, date, author=creator,
+        latitude=location[0], longitude=location[1], altitude=location[2]
+    )
+
+    if len(row['tags']):
+        for key in row['tags'].split(','):
+            keyword = __database_nb(key.strip(), TAGS, tag, {'title': key.strip(), 'date': date})
+            tag_note(keyword, quote)
