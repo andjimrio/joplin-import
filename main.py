@@ -1,4 +1,4 @@
-from process import ini_process, csv_process, end_process
+from process import ini_process, csv_process, kindle_process, end_process
 
 ALMONTE = [37.3592723, -5.9833488, 17]
 ARQUEROS = [37.3761966, -5.9982708, 20.58]
@@ -27,11 +27,18 @@ def literature(title="LITERATURA", file="import_kindle"):
     csv_process('files/kindle_arq.csv', ALMONTE, CREATOR, notebook)
     csv_process('files/kindle_cb.csv', CAVABIANCA, CREATOR, notebook, delimiter=';')
     csv_process('files/kindle_vt.csv', VILLATEVERE, CREATOR, notebook, delimiter=';')
+    kindle_process('files/txt/My Clippings.txt', VILLATEVERE, CREATOR, notebook)
+    return end_process(file)
+
+
+def essays(title="ENSAYOS", file="import_cipplings"):
+    notebook = ini_process(title)
+    kindle_process('files/txt/My Clippings.txt', VILLATEVERE, CREATOR, notebook)
     return end_process(file)
 
 
 if __name__ == '__main__':
-    poetry()
-    spirituality()
+    #poetry()
+    #spirituality()
     literature()
-
+    #essays()

@@ -59,13 +59,13 @@ def get_highlights(path=path_highlights, separator=separator, encoding="utf-8-si
             if hl != '\n':
                 md = get_highlight_data(hl)
                 if md:
-                    title = f"[{md['page'].zfill(4)}] {md['highlight'][:150]}"
+                    title = md['highlight'][:50]
 
                     if md['type'] == "highlight":
                         loc = md['location'].split('-')[-1]
                         location[loc] = md['date_time']
                         csv[md['date_time']] = {"title": title, "date": md['date_time'], "text": md['highlight'],
-                                                "author": md['author'], "book": md['title'], "ref": md['page'],
+                                                "author": md['author'], "book": md['title'], "page": md['page'],
                                                 "tags": ""}
                     elif md['type'] == "note":
                         dt = location[loc]

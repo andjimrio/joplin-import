@@ -22,9 +22,15 @@ def __database_nb(key, obj, fn, args={}):
 
 def __date(data, pattern=None):
     try:
-        res = datetime.strptime(data, pattern)
+        if isinstance(data, datetime):
+            res = data
+        else:
+            res = datetime.strptime(data, pattern)
     except ValueError:
-        res = datetime.strptime(data, '%d/%m/%Y')
+        if len(data) > 10:
+            res = datetime.strptime(data, '%d/%m/%Y %H:%M')
+        else:
+            res = datetime.strptime(data, '%d/%m/%Y')
     return res.isoformat('T', 'milliseconds')
 
 
@@ -35,8 +41,8 @@ def __title(title, subtitle):
 
 
 def __metadata(text, row):
-    values = ['date', 'author', 'book', 'ref', 'tags']
-    return text + "\n\n\n-----\n" + "\n".join(['- {}'.format(row[value]) for value in values if row[value]])
+    values = ['date', 'author', 'book', 'page', 'tags']
+    return text + "\n\n\n-----\n" + "\n".join(['- {}: {}'.format(value, row[value]) for value in values if row[value]]) + "\n-----\n"
 
 
 def ini_process(nb="IMPORT"):
@@ -71,7 +77,7 @@ def kindle_process(infile, location=LOCATION, creator=CREATOR, parent=None, meta
 
 def jex_process(nb, row, location, creator, metadata, dateformat=None):
     date = __date(row['date'], dateformat)
-    title = __title(row['title'], row['ref'])
+    title = __title(row['title'], row['page'])
     body = __metadata(row['text'], row) if metadata else row['text']
 
     author = __database_nb(row['author'], AUTHORS, notebook,
